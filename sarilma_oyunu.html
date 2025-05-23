@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sarılma Oyunu</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #ffe4e1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+  }
+  #hugCircle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    margin: 40px;
+    transition: filter 0.3s;
+    user-select: none;
+    touch-action: none;
+    position: absolute;
+    object-fit: cover;
+    border: 4px solid red;
+  }
+  #hugCircle.hugging {
+    filter: brightness(0.7);
+    border-color: green;
+  }
+  #score {
+    font-size: 24px;
+    margin-top: 10px;
+    z-index: 10;
+  }
+  #message {
+    font-size: 20px;
+    margin-top: 20px;
+    z-index: 10;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 20px;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<h1>Sarılma Oyunu</h1>
+<div id="score">Puan: 0</div>
+<img id="hugCircle" src="sevgilimle.jpg" alt="Sevgilimle" />
+<div id="message"></div>
+<button id="restartBtn" style="display:none;">Tekrar Oyna</button>
+
+<script>
+  const hugCircle = document.getElementById('hugCircle');
+  const scoreText = document.getElementById('score');
+  const message = document.getElementById('message');
+  const restartBtn = document.getElementById('restartBtn');
+
+  let score = 0;
+  let hugTime = 0;
+  const requiredHugTime = 3000; // 3 saniye
+  let hugTimer = null;
+  let hugging = false;
+
+  function randomPosition() {
+    const maxX = window.innerWidth - hugCircle.offsetWidth - 20;
+    const maxY = window.innerHeight - hugCircle.offsetHeight - 100;
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+    hugCircle.style.left = x + 'px';
+    hugCircle.style.top = y + 'px';
+  }
+
+  function startHug() {
+    if (hugging) return;
+    hugging = true;
+    hugCircle.classList.add('hugging');
+    hugTime = Date.now();
+
+    hugTimer = setTimeout(() => {
+      score++;
+      scoreText.textContent = 'Puan: ' + score;
+      message.textContent = 'Başarılı sarılma! ❤️';
+      hugging = false;
+      hugCircle.classList.remove('hugging');
+      if (score >= 5) {
+        message.textContent = 'Oyun bitti! Toplam puan: ' + score;
+        hugCircle.style.display = 'none';
+        restartBtn.style.display = 'block';
+      } else {
+        randomPosition();
+      }
+    }, requiredHugTime);
+  }
+
+  function endHug() {
+    if (!hugging) return;
+    hugging = false;
+    hugCircle.classList.remove('hugging');
+    clearTimeout(hugTimer);
+    hugTimer = null;
+    message.textContent = 'Sarılma başarısız. Tekrar dene!';
+  }
+
+  hugCircle.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startHug();
+  });
+  hugCircle.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    endHug();
+  });
+
+  hugCircle.addEventListener('mousedown', startHug);
+  hugCircle.addEventListener('mouseup', endHug);
+  hugCircle.addEventListener('mouseleave', endHug);
+
+  restartBtn.addEventListener('click', () => {
+    score = 0;
+    scoreText.textContent = 'Puan: 0';
+    message.textContent = '';
+    hugCircle.style.display = 'block';
+    restartBtn.style.display = 'none';
+    randomPosition();
+  });
+
+  // Başlangıç pozisyonu
+  randomPosition();
+</script>
+
+</body>
+</html>
